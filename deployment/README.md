@@ -21,7 +21,12 @@ pip install -e .
 cd kvquant
 python setup_cuda.py install
 cd ..
-pip install flash-attn==2.5.5 --no-build-isolation
+<!-- pip install flash-attn==2.5.5 --no-build-isolation  -->
+<!-- 安装 flash-attn 会报错 -->
+<!-- RuntimeError: Failed to import transformers.models.llama.modeling_llama because of the following error (look up to see its traceback): -->
+<!-- /home/storage20T/guanjiawei/anaconda3/envs/deploy/lib/python3.9/site-packages/flash_attn_2_cuda.cpython-39-x86_64-linux-gnu.so: undefined symbol: _ZN3c104cuda9SetDeviceEi -->
+
+pip install protobuf
 ```
 
 3. Run kernel benchmarking
@@ -33,6 +38,10 @@ cp ../quant/quantizers.pickle .
 CUDA_VISIBLE_DEVICES=0 python cache-llama-activations.py <path-to-llama-7b-hf> --wbits 4 --nsamples 1 --seqlen 2048 --quantizer-path quantizers.pickle --output-path activations.pickle;
 ```
 
+```
+CUDA_VISIBLE_DEVICES=0 python cache-llama-activations.py /home/storage20T/guanjw_backup/.cache/huggingface/hub/models--TinyLlama--TinyLlama-1.1B-Chat-v1.0/snapshots/fe8a4ea1ffedaf415f4da2f062534de366a451e6 --wbits 4 --nsamples 1 --seqlen 1024 --quantizer-path quantizers.pickle --output-path activations.pickle;
+```
+
 Assuming the activations and the quantizers are stored in "activations.pickle" and "quantizers.pickle", you can run the kernel benchmarks by running the python scripts in the "scripts" folder.
 
 4. Run end-to-end generation
@@ -40,4 +49,9 @@ Assuming the activations and the quantizers are stored in "activations.pickle" a
 ```
 cp ../quant/quantizers.pickle .
 CUDA_VISIBLE_DEVICES=0 python llama.py <path-to-llama-7b-hf> wikitext2 --abits 4 --include_sparse --sparsity-threshold 0.99 --quantizer-path quantizers.pickle --benchmark 128 --check
+```
+
+```
+cp ../quant/quantizers.pickle .
+CUDA_VISIBLE_DEVICES=0 python llama.py /home/storage20T/guanjw_backup/.cache/huggingface/hub/models--TinyLlama--TinyLlama-1.1B-Chat-v1.0/snapshots/fe8a4ea1ffedaf415f4da2f062534de366a451e6 wikitext2 --abits 4 --include_sparse --sparsity-threshold 0.99 --quantizer-path quantizers.pickle --benchmark 128 --check
 ```

@@ -1,0 +1,3 @@
+# ninja log v5
+0	21653	1712037824995388324	/home/storage20T/guanjiawei/AIGC/KVQuant/deployment/kvquant/build/temp.linux-x86_64-cpython-39/quant_cuda.o	6e65ab794a9ed943
+1	63621	1712037866923046841	/home/storage20T/guanjiawei/AIGC/KVQuant/deployment/kvquant/build/temp.linux-x86_64-cpython-39/quant_cuda_kernel.o	e7f03da7cc26a434
