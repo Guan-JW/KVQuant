@@ -165,7 +165,7 @@ if __name__ == '__main__':
     DEV = torch.device('cuda:0')
 
     args = parser.parse_args()
-
+    print(f"{args.seqlen=}, {args.maxseqlen=}, {args.include_sparse=}")
     model = get_model(args.model, args.seqlen, args.maxseqlen, args.abits, args.include_sparse, args.first_few_fp16)
     model.eval()
     model.model.set_devices()
@@ -179,6 +179,7 @@ if __name__ == '__main__':
     if args.abits != 16:
         with open(args.quantizer_path, 'rb') as handle:
             quantizers = pickle.load(handle)
+            # print(f"{quantizers=}")
 
     if args.benchmark:
         # load lookup table + outlier thresholds

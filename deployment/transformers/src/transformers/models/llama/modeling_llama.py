@@ -352,7 +352,7 @@ def compute_lut(
 
 # class to manage the key cache
 class QuantK(nn.Module):
-    def __init__(self, bits=2, hidden_size=4096, num_heads=32, max_position_embeddings=-1, include_sparse=False, sparsity_threshold=0.99, rope_theta=10000, use_orig_sparse=False, first_few_fp16=0):
+    def __init__(self, bits=2, hidden_size=4096, num_heads=32, head_dim=128, max_position_embeddings=-1, include_sparse=False, sparsity_threshold=0.99, rope_theta=10000, use_orig_sparse=False, first_few_fp16=0):
 
         """
         bits: number of bits for quantization
@@ -373,7 +373,7 @@ class QuantK(nn.Module):
         # model parameters
         self.hidden_size = hidden_size
         self.num_heads = num_heads
-        self.head_dim = hidden_size // num_heads
+        self.head_dim = head_dim
 
         # quantization parameters
         self.bits = bits
@@ -391,12 +391,20 @@ class QuantK(nn.Module):
         # KV cache parameters
         self.max_len = max_position_embeddings
         self.klen = 0
-        self.kcache = torch.zeros((self.num_heads, (self.head_dim // 32) * self.bits, self.max_len), dtype=torch.int).cuda()
-
+        self.kcache = torch.zeros((self.num_heads, 
+                                (self.head_dim // 32) * self.bits, 
+                                self.max_len), 
+                            dtype=torch.int).cuda()
+        # print(f"{self.kcache.shape=}")
+        # >> [4, 8. 1024]
         # outlier params
         if self.include_sparse:
-            self.outliers = torch.zeros((self.max_len,42), dtype=torch.float).cuda()
-            self.outlier_indices = torch.zeros((self.max_len,42), dtype=torch.int).cuda()
+            # self.outliers = torch.zeros((self.max_len,42), dtype=torch.float).cuda()
+            # self.outlier_indices = torch.zeros((self.max_len,42), dtype=torch.int).cuda()
+
+            # ????????
+            self.outliers = torch.zeros((self.max_len,22), dtype=torch.float).cuda()
+            self.outlier_indices = torch.zeros((self.max_len,22), dtype=torch.int).cuda()
 
         # For LWM - rope theta
         self.rope_theta = rope_theta
@@ -454,6 +462,9 @@ class QuantK(nn.Module):
         self.sparsity_threshold = sparsity_threshold
 
         # initialize lookup table
+        # print(f"{self.outlier_threshold_lower.shape=}")
+        # >> [256]
+        # print(f"{self.num_heads=}, {self.head_dim=}")
         self.lookup_table = torch.zeros((self.num_heads, self.head_dim, 2 ** self.bits))
         maxval = self.outlier_threshold_upper
         minval = self.outlier_threshold_lower
@@ -660,16 +671,24 @@ class QuantK(nn.Module):
         Performs the forward pass using the compressed key cache (and also appends a new key vector)
         """
 
+        # print(f"before - {q.shape=}, {k.shape=}")
+        # >> q.shape=torch.Size([32, 1, 64]), k.shape=torch.Size([1, 4, 1, 64])
         k = k.flatten()
         q = q.float()
         q = q.transpose(0,1).contiguous()
         k = k.float()
+        # print(f"after - {q.shape=}, {k.shape=}")
+        # >> q.shape=torch.Size([1, 32, 64]), k.shape=torch.Size([256])
+        # print(f"{self.klen=}")
 
         # sparse packing kernel
         if self.include_sparse:
             outliers_rescaled = k.clone()
 
             if self.bits == 4:
+                # gjw: append vector k to self.kcache
+                # print(f"{self.kcache.is_contiguous()=}")
+                # >> always contiguous
                 quant_cuda.vecquant4appendvecKsparse(
                     self.kcache,
                     self.lookup_table,
@@ -884,8 +903,10 @@ class QuantK(nn.Module):
 
         Pack several key vectors in parallel
         """
-
+        print("Calling parallel_pack")
+        print(f"Before - {k.shape=}")
         k = k.float().contiguous()
+        print(f"After - {k.shape=}")
 
         # update klen
         self.klen += k.shape[-1]
@@ -978,7 +999,7 @@ class QuantK(nn.Module):
 
 # class for managing compressed values
 class QuantV(nn.Module):
-    def __init__(self, bits=2, hidden_size=4096, num_heads=32, max_position_embeddings=-1, include_sparse=False, sparsity_threshold=0.99, first_few_fp16=0):
+    def __init__(self, bits=2, hidden_size=4096, num_heads=32, head_dim=128, max_position_embeddings=-1, include_sparse=False, sparsity_threshold=0.99, first_few_fp16=0):
         super().__init__()
 
         """
@@ -996,7 +1017,7 @@ class QuantV(nn.Module):
         # model parameters
         self.hidden_size = hidden_size
         self.num_heads = num_heads
-        self.head_dim = hidden_size // num_heads
+        self.head_dim = head_dim
 
         # quantization parameters
         self.bits = bits
@@ -1017,8 +1038,12 @@ class QuantV(nn.Module):
         # outlier params
         if self.include_sparse:
             # only supports 1% outliers
-            self.outliers = torch.zeros((self.max_len,42), dtype=torch.float).cuda()
-            self.outlier_indices = torch.zeros((self.max_len,42), dtype=torch.int).cuda()
+            # self.outliers = torch.zeros((self.max_len,42), dtype=torch.float).cuda()
+            # self.outlier_indices = torch.zeros((self.max_len,42), dtype=torch.int).cuda()
+
+            # ？？？？
+            self.outliers = torch.zeros((self.max_len,22), dtype=torch.float).cuda()
+            self.outlier_indices = torch.zeros((self.max_len,22), dtype=torch.int).cuda()
 
         # first few in fp16
         self.first_few_fp16 = first_few_fp16
@@ -1399,7 +1424,7 @@ class LlamaAttention(nn.Module):
         self.head_dim = self.hidden_size // self.num_heads
         self.num_key_value_heads = config.num_key_value_heads
         self.num_key_value_groups = self.num_heads // self.num_key_value_heads
-        assert (self.num_key_value_groups == 1) # kernels don't yet support GQA
+        # assert (self.num_key_value_groups == 1) # kernels don't yet support GQA
         self.max_position_embeddings = config.max_position_embeddings
         self.rope_theta = config.rope_theta
         self.is_causal = True
@@ -1425,6 +1450,8 @@ class LlamaAttention(nn.Module):
 
         # argument to use attention sink method
         self.first_few_fp16 = config.first_few_fp16
+        # print(f"{self.use_orig_sparse=}, {self.first_few_fp16=}")
+        # >> False, 0
 
         # set max seqlen for KV cache
         if config.maxseqlen > -1:
@@ -1441,6 +1468,8 @@ class LlamaAttention(nn.Module):
             bits=self.abits,
             include_sparse=self.include_sparse,
             hidden_size=self.hidden_size,
+            num_heads=self.num_key_value_heads,
+            head_dim=self.head_dim,
             max_position_embeddings=maxseqlen,
             rope_theta=self.rope_theta,
             use_orig_sparse=self.use_orig_sparse,
@@ -1450,6 +1479,8 @@ class LlamaAttention(nn.Module):
             bits=self.abits,
             include_sparse=self.include_sparse,
             hidden_size=self.hidden_size,
+            num_heads=self.num_key_value_heads,
+            head_dim=self.head_dim,
             max_position_embeddings=maxseqlen,
             first_few_fp16=self.first_few_fp16
         )
@@ -1586,6 +1617,11 @@ class LlamaAttention(nn.Module):
                 key_states_rope = apply_rotary_pos_emb_query(key_states, cos, sin, position_ids)
 
             # parallel version (not using quantized KV cache)
+            # For TinyLlama
+            key_states_rope = repeat_kv(key_states_rope, self.num_key_value_groups)
+            value_states = repeat_kv(value_states, self.num_key_value_groups)
+            print(f"{query_states.shape=}, {key_states_rope.shape=}")
+            
             key_states_rope = key_states_rope.transpose(2, 3)
             attn_weights = torch.matmul(query_states, key_states_rope) / math.sqrt(self.head_dim)
 
@@ -1617,7 +1653,6 @@ class LlamaAttention(nn.Module):
                 else:
                     self.kcache.parallel_pack(key_states)
         else:
-
             if self.kcache.klen < self.first_few_fp16:
                 # whether to use dynamic or cached sin/cos
                 if self.dynamicrope:
@@ -1834,6 +1869,8 @@ class LlamaFlashAttention2(LlamaAttention):
             query_states = self.q_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
             key_states = self.k_proj(hidden_states).view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
 
+        # print(f"{key_states.shape=}, {value_states.shape=}")    
+        # >> torch.Size([1, 4, 1, 64]) [bs, #heads, q_len, head_dim]
         key_states = key_states.half()
         value_states = value_states.half()
 
@@ -1841,6 +1878,8 @@ class LlamaFlashAttention2(LlamaAttention):
             kv_seq_len = key_states.shape[-2]
         else:
             kv_seq_len = self.kcache.klen + 1
+        # print(f"{kv_seq_len=}")
+        # >> increase
 
         # dynamically compute cos / sin for RoPE
         if self.dynamicrope:
@@ -1852,6 +1891,9 @@ class LlamaFlashAttention2(LlamaAttention):
             cos, sin = self.rotary_emb(value_states, seq_len=kv_seq_len)
             query_states = apply_rotary_pos_emb_query(query_states, cos, sin, position_ids)
 
+        # print(f"{q_len=}, {self.kcache.klen=}")
+        # >> q_len=1, klen increase
+        # >> won't enter here
         if q_len > 1 and self.kcache.klen == 0:
             # flash attention
             if self.dynamicrope:
@@ -1921,7 +1963,7 @@ class LlamaFlashAttention2(LlamaAttention):
                 self.vcache.parallel_pack(value_states, upper_outlier_vals, upper_outlier_indices, lower_outlier_vals, lower_outlier_indices)
 
         else:
-
+            # >> enter here
             # fused forward pass for query
             if self.kcache.klen < self.first_few_fp16:
                 # whether to use dynamic or cached sin/cos
@@ -1962,7 +2004,8 @@ class LlamaFlashAttention2(LlamaAttention):
                 if self.use_orig_sparse:
                     attn_weights = self.kcache.forward_fused_sparse_orig(query_states, key_states)
                 else:
-                    attn_weights = self.kcache.forward_fused_sparse(query_states, key_states)
+                    attn_weights = self.kcache.forward_fused_sparse(
+                                    query_states, key_states)
                 attn_weights = attn_weights.unsqueeze(0)
                 attn_weights = attn_weights / math.sqrt(self.head_dim)
 

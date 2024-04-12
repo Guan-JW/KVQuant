@@ -28,15 +28,24 @@ pip install flash-attn --no-build-isolation
 ```
 CUDA_VISIBLE_DEVICES=0 python llama_simquant.py <path-to-llama-7b-hf> --abits 4 --nsamples 16 --seqlen 2048 --nuq --fisher <path-to-fisher-info> --quantize --include_sparse --sparsity-threshold 0.99 --quantizer-path quantizers.pickle ;
 ```
+```
+CUDA_VISIBLE_DEVICES=0 python llama_simquant.py /home/storage20T/guanjw_backup/.cache/huggingface/hub/models--TinyLlama--TinyLlama-1.1B-Chat-v1.0/snapshots/fe8a4ea1ffedaf415f4da2f062534de366a451e6 --abits 4 --nsamples 2 --seqlen 1024 --nuq --fisher ../gradients/output/ --quantize --include_sparse --sparsity-threshold 0.99 --quantizer-path quantizers.pickle
+```
 
 2. Evaluate with quantizer using nuq4-1%:
 ```
 CUDA_VISIBLE_DEVICES=0 python llama_simquant.py <path-to-llama-7b-hf> --abits 4 --nsamples 16 --seqlen 2048 --nuq --include_sparse --sparsity-threshold 0.99 --quantizer-path quantizers.pickle ;
 ```
+```
+CUDA_VISIBLE_DEVICES=0 python llama_simquant.py /home/storage20T/guanjw_backup/.cache/huggingface/hub/models--TinyLlama--TinyLlama-1.1B-Chat-v1.0/snapshots/fe8a4ea1ffedaf415f4da2f062534de366a451e6 --abits 4 --nsamples 2 --seqlen 1024 --nuq --include_sparse --sparsity-threshold 0.99 --quantizer-path quantizers.pickle
+```
 
 3. Passkey evaluation with quantizer using nuq4-1% (note that the multi-GPU inference environment for running long sequence length passkey evaluation with larger models / longer context lengths is on the roadmap):
 ```
 CUDA_VISIBLE_DEVICES=0 python eval_passkey_simquant.py --path_to_ckp <path-to-llama-7b-hf> --abits 4 --simquant --quantizer-path quantizers.pickle ;
+```
+```
+CUDA_VISIBLE_DEVICES=0 python eval_passkey_simquant.py --path_to_ckp /home/storage20T/guanjw_backup/.cache/huggingface/hub/models--TinyLlama--TinyLlama-1.1B-Chat-v1.0/snapshots/fe8a4ea1ffedaf415f4da2f062534de366a451e6 --abits 4 --simquant --quantizer-path quantizers.pickle
 ```
 
 ---

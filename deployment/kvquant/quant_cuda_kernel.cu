@@ -1773,7 +1773,7 @@ __global__ void VecQuant4AppendVecKSparse(
   }
 
   // update mat entry using computed idx
-  int row = packedoffset + (threadIdx.x / 8);
+  int row = packedoffset + (threadIdx.x / 8); // = offset / 8, identify which integer to store
   int i = fullwidth * row + width;
   int word_offset = (threadIdx.x % 8) * 4;
   int word_to_add = (smallest_idx << word_offset);

@@ -149,6 +149,7 @@ def llama_eval(model, testenc, dev):
 def llama_calibration(model, dataloader, dev, perchannel_match, pertensor_match, bits, include_sparse=False, sparsity_threshold=0.999, nuq=False, fisher=None, norm=False, cap_outliers=False, first_few_fp16=False):
     print('Starting ...')
 
+    print(f"{model.config.hidden_size=}, {model.config.num_attention_heads=}")
     use_cache = model.config.use_cache
     model.config.use_cache = False
     layers = model.model.layers

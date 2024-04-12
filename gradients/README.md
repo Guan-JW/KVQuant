@@ -18,6 +18,14 @@ Run the following command:
 ```
 CUDA_VISIBLE_DEVICES=0 python run-fisher.py --model_name_or_path [MODEL_PATH] --output_dir [OUTPUT_PATH] --dataset wikitext2 --seqlen 2048 --maxseqlen 2048 --num_examples 16 
 ```
+```
+<!-- TinyLlama-1.1B -->
+CUDA_VISIBLE_DEVICES=0 python run-fisher.py --model_name_or_path /home/storage20T/guanjw_backup/.cache/huggingface/hub/models--TinyLlama--TinyLlama-1.1B-Chat-v1.0/snapshots/fe8a4ea1ffedaf415f4da2f062534de366a451e6 --output_dir ./output/ --dataset wikitext2 --seqlen 1024 --maxseqlen 1024 --num_examples 2 
+```
+```
+<!-- Llama2-7B -->
+CUDA_VISIBLE_DEVICES=0 python run-fisher.py --model_name_or_path /home/storage20T/guanjw_backup/.cache/huggingface/hub/models--meta-llama--Llama-2-7b-hf/snapshots/8a0442e81540efaeb1a0fe3e95477b5e0edfd423 --output_dir ./output_llama2/ --dataset wikitext2 --seqlen 2048 --maxseqlen 2048 --num_examples 2 
+```
 
 This command performs the following steps
 

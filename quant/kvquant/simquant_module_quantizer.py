@@ -382,11 +382,13 @@ class SimQuant:
         self.nsamples = 0
 
         self.out = None
+        self.W = W
 
     def add_batch(self, inp, out):
         if len(out.shape) == 2:
             out = out.unsqueeze(0)
         tmp = out.shape[0]
+        print(f"{out.shape=}, {self.W.shape=}, {inp.shape=}")
         if isinstance(self.layer, nn.Linear):
             if len(out.shape) == 3:
                 out = out.reshape((-1, self.rows))
