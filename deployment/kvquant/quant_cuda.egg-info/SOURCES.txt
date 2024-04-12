@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 BatchData.h
+=======
+>>>>>>> 5071d37db3f75117785cafec23f4f56351b9a267
 quant_cuda.cpp
 quant_cuda_kernel.cu
 setup_cuda.py

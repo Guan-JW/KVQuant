@@ -21,8 +21,13 @@ pip install -e .
 cd kvquant
 python setup_cuda.py install
 cd ..
+<<<<<<< HEAD
 pip install flash-attn
 <!-- 安装 flash-attn==2.5.5 会报错 -->
+=======
+<!-- pip install flash-attn==2.5.5 --no-build-isolation  -->
+<!-- 安装 flash-attn 会报错 -->
+>>>>>>> 5071d37db3f75117785cafec23f4f56351b9a267
 <!-- RuntimeError: Failed to import transformers.models.llama.modeling_llama because of the following error (look up to see its traceback): -->
 <!-- /home/storage20T/guanjiawei/anaconda3/envs/deploy/lib/python3.9/site-packages/flash_attn_2_cuda.cpython-39-x86_64-linux-gnu.so: undefined symbol: _ZN3c104cuda9SetDeviceEi -->
 
@@ -53,5 +58,9 @@ CUDA_VISIBLE_DEVICES=0 python llama.py <path-to-llama-7b-hf> wikitext2 --abits 4
 
 ```
 cp ../quant/quantizers.pickle .
+<<<<<<< HEAD
 CUDA_VISIBLE_DEVICES=0 python llama.py /home/storage20T/guanjw_backup/.cache/huggingface/hub/models--TinyLlama--TinyLlama-1.1B-Chat-v1.0/snapshots/fe8a4ea1ffedaf415f4da2f062534de366a451e6 wikitext2 --abits 4 --include_sparse --sparsity-threshold 0.99 --quantizer-path quantizers.pickle --benchmark 128 --check --maxseqlen 1024
+=======
+CUDA_VISIBLE_DEVICES=0 python llama.py /home/storage20T/guanjw_backup/.cache/huggingface/hub/models--TinyLlama--TinyLlama-1.1B-Chat-v1.0/snapshots/fe8a4ea1ffedaf415f4da2f062534de366a451e6 wikitext2 --abits 4 --include_sparse --sparsity-threshold 0.99 --quantizer-path quantizers.pickle --benchmark 128 --check
+>>>>>>> 5071d37db3f75117785cafec23f4f56351b9a267
 ```

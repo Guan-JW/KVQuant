@@ -1,6 +1,7 @@
 # ninja log v5
 0	21653	1712037824995388324	/home/storage20T/guanjiawei/AIGC/KVQuant/deployment/kvquant/build/temp.linux-x86_64-cpython-39/quant_cuda.o	6e65ab794a9ed943
 1	63621	1712037866923046841	/home/storage20T/guanjiawei/AIGC/KVQuant/deployment/kvquant/build/temp.linux-x86_64-cpython-39/quant_cuda_kernel.o	e7f03da7cc26a434
+<<<<<<< HEAD
 13	48681	1712637175382903023	/home/storage20T/guanjiawei/AIGC/KVQuant/deployment/kvquant/build/temp.linux-x86_64-cpython-39/quant_cuda_kernel.o	e7f03da7cc26a434
 33	17235	1712637517450642474	/home/storage20T/guanjiawei/AIGC/KVQuant/deployment/kvquant/build/temp.linux-x86_64-cpython-39/quant_cuda.o	6e65ab794a9ed943
 13	24953	1712638653070888688	/home/storage20T/guanjiawei/AIGC/KVQuant/deployment/kvquant/build/temp.linux-x86_64-cpython-39/quant_cuda.o	c9daeb3662a60c9a
@@ -46,3 +47,5 @@
 15	24773	1712658163260439141	/home/storage20T/guanjiawei/AIGC/KVQuant/deployment/kvquant/build/temp.linux-x86_64-cpython-39/quant_cuda.o	c9daeb3662a60c9a
 14	25858	1712658581207597884	/home/storage20T/guanjiawei/AIGC/KVQuant/deployment/kvquant/build/temp.linux-x86_64-cpython-39/quant_cuda.o	c9daeb3662a60c9a
 29	25509	1712664585304047355	/home/storage20T/guanjiawei/AIGC/KVQuant/deployment/kvquant/build/temp.linux-x86_64-cpython-39/quant_cuda.o	c9daeb3662a60c9a
+=======
+>>>>>>> 5071d37db3f75117785cafec23f4f56351b9a267
